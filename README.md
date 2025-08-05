@@ -19,22 +19,43 @@ This project is an AI-driven solution designed to automate the eligibility scree
 
 ```
 .
+social-support-ai-automation/
 ├── agents/
-│   ├── extraction_agent.py
-│   ├── validation_agent.py
-│   ├── eligibility_agent.py
-│   └── recommendation_agent.py
-├── orchestrator/
+│   ├── eligibility_agent/
+│   │   ├── main.py
+│   │  │   │
+│   ├── extraction_agent/
+│   │   ├── bank_statement_extractor.py
+│   │   ├── id_image_extractor.py
+│   │   ├── resume_extractor.py
+│   │   ├── main.py
+│   │   ├── test_extraction.py
+│   │   │
+│   ├── recommendation_agent/
+│   │   ├── main.py
+│   │   ├── recommendation_agent.py
+│   │
+│   └── validation_agent/
+│       ├── main.py
+├── backend\api
 │   └── main.py
+├── data\sample_docs
+│   └── bank_statement_ws.xlsx
+    └── emirates_id_sample.png
+    └── john_doe_resume.pdf
 ├── frontend/
 │   └── main.py
 ├── models/
 │   └── recommendation_model.py
+├── orchestrator/
+│   └── main.py
+    └── agents.py
+├── test/
+│   
 ├── utils/
-│   ├── document_utils.py
-│   ├── validation_rules.py
-│   └── image_processing.py
+│   │
 └── README.md
+└── requirements.txt
 ```
 
 ---
@@ -44,7 +65,7 @@ This project is an AI-driven solution designed to automate the eligibility scree
 ### 1. Clone the Repo
 
 ```bash
-git clone <your-private-repo-url>
+git clone https://github.com/RishuKu/social-support-ai-automation.git
 cd social-support-ai-automation
 ```
 
