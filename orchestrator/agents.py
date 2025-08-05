@@ -6,10 +6,26 @@ from agents.validation_agent.main import validate_data
 from agents.eligibility_agent.main import mock_predict_eligibility
 from agents.recommendation_agent.main import recommend_enablement
 
+from langchain.tools import tool
+
 @tool
-def ExtractionAgent(document_path: str) -> dict:
-    """Extract applicant info from uploaded document"""
-    return extract_applicant_info(document_path)
+def ExtractionAgent(
+    resume_path: str,
+    bank_statement_path: str,
+    emirates_id_path: str
+) -> dict:
+    """
+    Extracts structured applicant info from resume, bank statement, and Emirates ID.
+    """
+    from agents.extraction_agent.main import extract_applicant_info
+
+    return extract_applicant_info({
+        "resume_path": resume_path,
+        "bank_statement_path": bank_statement_path,
+        "emirates_id_path": emirates_id_path
+    })
+
+
 
 @tool
 def ValidationAgent(applicant_data: dict) -> dict:

@@ -6,3 +6,6 @@ python-multipart
 requests
 langgraph
 langchain
+PyMuPDF>=1.23.0
+langsmith
+openpyxl

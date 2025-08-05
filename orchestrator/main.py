@@ -1,26 +1,46 @@
+# orchestrator/main.py
+
 import pprint
-from langgraph.graph import StateGraph, END
+import os
+from langgraph.graph import StateGraph
+from langsmith import traceable
 from orchestrator.agents import (
     ExtractionAgent,
     ValidationAgent,
     EligibilityAgent,
-    RecommendationAgent,
 )
+from agents.recommendation_agent.recommendation_agent import RecommendationAgent
+from dotenv import load_dotenv
+load_dotenv()
+
+# === LangSmith API ENV VARS ===
+os.environ["LANGCHAIN_API_KEY"] = "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"
+os.environ["LANGCHAIN_PROJECT"] = "SocialSupportAI"
+os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
+os.environ["LANGCHAIN_TRACING_V2"] = "true"
 
 # Define the state schema
 state_schema = dict
-
-# Node 1: Extract data
+@traceable(name="SocialSupportAI")
 def node_extract(state):
-    pprint.pprint({" Step": "Extraction", "input_state": state})
-    path = state["document_path"]
-    output = ExtractionAgent.invoke(path)
+    pprint.pprint({"Step": "Extraction", "input_state": state})
+    
+    resume_path = state.get("resume_path")
+    bank_statement_path = state.get("bank_statement_path")
+    emirates_id_path = state.get("emirates_id_path")
+
+    input_payload = {
+        "resume_path": resume_path,
+        "bank_statement_path": bank_statement_path,
+        "emirates_id_path": emirates_id_path,
+    }
+
+    output = ExtractionAgent.invoke(input_payload)
     return {
         "applicant_data": output,
         "extracted_data": output
     }
 
-# Node 2: Validate extracted data
 def node_validate(state):
     pprint.pprint({"Step": "Validation", "input_state": state})
     data = state["applicant_data"]
@@ -28,35 +48,27 @@ def node_validate(state):
     return {
         "validation_result": output,
         "applicant_data": data,
-        "extracted_data": state.get("extracted_data")  # retain
+        "extracted_data": state.get("extracted_data")
     }
 
-# Branching decision
 def should_continue(state):
     result = state["validation_result"]
-    pprint.pprint({" Step": "Validation Check", "validation_result": result})
+    pprint.pprint({"Step": "Validation Check", "validation_result": result})
 
-    valid_result = result.get("valid", {})
-    if isinstance(valid_result, dict):
-        return "eligible" if valid_result.get("valid", False) else "end"
-    elif isinstance(valid_result, bool):
-        return "eligible" if valid_result else "end"
-    else:
-        return "end"
+    valid = result.get("valid", False)
+    return "eligible" if valid else "end"
 
-# Node 3: Eligibility check
 def node_eligibility(state):
-    pprint.pprint({" Step": "Eligibility", "input_state": state})
+    pprint.pprint({"Step": "Eligibility", "input_state": state})
     data = state["applicant_data"]
     output = EligibilityAgent.invoke({"applicant_data": data})
     return {
         "eligibility_result": output,
-        "applicant_data": data,
         "validation_result": state.get("validation_result"),
-        "extracted_data": state.get("extracted_data")
+        "extracted_data": state.get("extracted_data"),
+        "applicant_data": data
     }
 
-# Node 4: Recommendation generation
 def node_recommend(state):
     pprint.pprint({"Step": "Recommendation", "input_state": state})
     data = state["applicant_data"]
@@ -65,11 +77,10 @@ def node_recommend(state):
         "recommendations": output,
         "eligibility_result": state.get("eligibility_result"),
         "validation_result": state.get("validation_result"),
-        "applicant_data": data,
-        "extracted_data": state.get("extracted_data")
+        "extracted_data": state.get("extracted_data"),
+        "applicant_data": data
     }
 
-# Build LangGraph
 def build_graph():
     graph = StateGraph(state_schema)
 
@@ -90,12 +101,15 @@ def build_graph():
 
     return graph.compile()
 
-# Entry point
-def run_workflow(document_path: str) -> dict:
-    print("\n Starting workflow for document:", document_path)
+def run_workflow(resume_path: str, bank_statement_path: str, emirates_id_path: str) -> dict:
+    print("\n📄 Starting workflow with multimodal input")
     workflow = build_graph()
-    final_state = workflow.invoke({"document_path": document_path})
-    print("\n Final state of workflow:")
+    final_state = workflow.invoke({
+        "resume_path": resume_path,
+        "bank_statement_path": bank_statement_path,
+        "emirates_id_path": emirates_id_path
+    })
+    print("\n✅ Final state of workflow:")
     pprint.pprint(final_state)
 
     return {

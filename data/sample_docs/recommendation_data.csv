@@ -1,0 +1,8 @@
+name,income,employment_status,family_size,education_level,recommendation
+Alice,2000,unemployed,5,high_school,Job training program
+Bob,7000,employed,3,bachelor,None
+Charlie,1500,unemployed,4,high_school,Resume workshop
+David,2500,unemployed,2,bachelor,Job portal link
+Eve,10000,employed,4,master,None
+Frank,1800,unemployed,6,none,Job training program
+Grace,2200,unemployed,3,high_school,Career counseling

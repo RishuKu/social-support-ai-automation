@@ -2,22 +2,29 @@
 
 def validate_data(applicant_data: dict) -> dict:
     issues = []
+    guidance = []
 
-    if applicant_data["income"] < 0:
-        issues.append("Invalid income")
+    income = applicant_data.get("income")
+    family_size = applicant_data.get("family_size")
 
-    if applicant_data["family_size"] <= 0:
-        issues.append("Family size must be at least 1")
+    if income is not None and income < 0:
+        issues.append("Invalid income (cannot be negative).")
+        guidance.append("Please ensure your bank statement is uploaded correctly and income is valid.")
+
+    if family_size is None or family_size <= 0:
+        issues.append("Invalid or missing family size.")
+        guidance.append("Please ensure your resume includes accurate family size information.")
 
     return {
         "valid": len(issues) == 0,
-        "issues": issues
+        "issues": issues,
+        "guidance": guidance
     }
 
 if __name__ == "__main__":
     sample = {
-        "income": 3000,
-        "family_size": 4,
+        "income": -200,
+        "family_size": 0,
         "employment_status": "unemployed"
     }
     print(validate_data(sample))
